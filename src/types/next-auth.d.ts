@@ -6,6 +6,8 @@ declare module "next-auth" {
       id: string;
       role: "ADMIN" | "STUDENT";
       mobile: string;
+      /** How this session logged in: "otp" or "password". */
+      loginMethod?: string;
     } & DefaultSession["user"];
   }
 }

@@ -147,7 +147,7 @@
     "cooldown": "Please wait a minute before requesting another OTP.",
     "sendFailed": "Could not send OTP. Please try again or use your password.",
     "inactive": "Your account is inactive. Please contact the library.",
-    "noPassword": "No password yet? Log in with OTP and set one from your profile.",
+    "noPassword": "No password yet, or forgot it? Log in with OTP, then use Change password.",
     "studentTitle": "Student login",
     "studentSubtitle": "Log in with your mobile number and password, or get an OTP.",
     "adminTitle": "Admin login",
@@ -193,8 +193,8 @@
     "returnedOn": "Returned on",
     "overdue": "Overdue",
     "noBooks": "No books issued to you.",
-    "changePassword": "Set / change password",
-    "currentPassword": "Current password (leave blank if you never set one)",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
     "newPassword": "New password (min 6 characters)",
     "passwordChanged": "Password updated.",
     "wrongPassword": "Current password is wrong.",
@@ -267,7 +267,11 @@
     "receiptsCount": "{count, plural, one {# receipt} other {# receipts}}",
     "otherPayments": "Other payments",
     "latestReceipts": "Fee receipts",
-    "validTill": "Valid till {date}"
+    "validTill": "Valid till {date}",
+    "confirmPassword": "Type the new password again",
+    "passwordMismatch": "The two new passwords do not match.",
+    "otpNoCurrent": "You logged in with an OTP, so your current password is not needed. Use this if you forgot it.",
+    "setFirstPassword": "You have not set a password yet. Set one to log in without an OTP."
   },
   "admin": {
     "panel": "Admin panel",

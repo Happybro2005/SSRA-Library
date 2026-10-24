@@ -6,9 +6,11 @@ export const authConfig = {
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   providers: [],
   callbacks: {
-    jwt({ token, user }) {
+    jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
+        // "otp" or "password": an OTP login proves the phone, so it can replace a forgotten password.
+        token.loginMethod = account?.provider;
         token.role = (user as { role?: string }).role;
         token.mobile = (user as { mobile?: string }).mobile;
       }
@@ -18,6 +20,7 @@ export const authConfig = {
       session.user.id = token.id as string;
       session.user.role = token.role as "ADMIN" | "STUDENT";
       session.user.mobile = token.mobile as string;
+      session.user.loginMethod = token.loginMethod as string | undefined;
       return session;
     },
     authorized({ auth, request }) {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { requireStudent } from "@/lib/session";
+import { auth } from "@/lib/auth";
 import { Notice } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { changePassword } from "../actions";
@@ -10,7 +11,9 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   const params = await searchParams;
   const t = await getTranslations("student");
   const tc = await getTranslations("common");
-  const errorKey = params.error === "wrongPassword" || params.error === "shortPassword" ? params.error : null;
+  const errorKey = ["wrongPassword", "shortPassword", "passwordMismatch"].includes(params.error ?? "") ? params.error! : null;
+  const viaOtp = (await auth())?.user?.loginMethod === "otp";
+  const askCurrent = !!user.passwordHash && !viaOtp;
 
   return (
     <>
@@ -52,22 +55,28 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         </dl>
       </section>
 
-      <section className="card max-w-md">
-        <h2 className="mb-3 font-semibold">{t("changePassword")}</h2>
+      <section id="password" className="card max-w-md scroll-mt-24">
+        <h2 className="mb-3 text-lg font-semibold">🔑 {t("changePassword")}</h2>
+        {!user.passwordHash && <p className="mb-3 text-sm text-slate-600">{t("setFirstPassword")}</p>}
+        {user.passwordHash && viaOtp && <p className="mb-3 text-sm text-slate-600">{t("otpNoCurrent")}</p>}
         {params.ok && <Notice tone="success">{t("passwordChanged")}</Notice>}
         {errorKey && <Notice tone="error">{t(errorKey)}</Notice>}
         <form action={changePassword} className="space-y-3">
-          {user.passwordHash && (
+          {askCurrent && (
             <label className="block">
               <span className="label">{t("currentPassword")}</span>
-              <input type="password" name="current" autoComplete="current-password" className="input" />
+              <input type="password" name="current" required autoComplete="current-password" className="input" />
             </label>
           )}
           <label className="block">
             <span className="label">{t("newPassword")}</span>
             <input type="password" name="next" minLength={6} required autoComplete="new-password" className="input" />
           </label>
-          <SubmitButton>{tc("save")}</SubmitButton>
+          <label className="block">
+            <span className="label">{t("confirmPassword")}</span>
+            <input type="password" name="confirm" minLength={6} required autoComplete="new-password" className="input" />
+          </label>
+          <SubmitButton pendingText="Saving…">{t("changePassword")}</SubmitButton>
         </form>
       </section>
     </>

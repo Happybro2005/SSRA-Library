@@ -40,6 +40,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         logout: t("common.logout"),
         seat: t("student.seat"),
         noSeat: t("student.noSeat"),
+        changePassword: t("student.changePassword"),
       }}
     >
       {children}

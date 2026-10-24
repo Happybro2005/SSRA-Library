@@ -20,7 +20,7 @@ export function StudentShell({
 }: {
   profile: StudentShellProfile;
   items: StudentNavItem[];
-  labels: { portal: string; logout: string; seat: string; noSeat: string };
+  labels: { portal: string; logout: string; seat: string; noSeat: string; changePassword: string };
   children: React.ReactNode;
 }) {
   const initials = profile.name
@@ -42,7 +42,14 @@ export function StudentShell({
               {labels.portal}
             </span>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Link
+              href="/student/profile#password"
+              className="rounded-full px-3 py-1 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-ink"
+            >
+              🔑 <span className="hidden sm:inline">{labels.changePassword}</span>
+              <span className="sr-only sm:hidden">{labels.changePassword}</span>
+            </Link>
             <form action={logout}>
               <button className="rounded-full px-3 py-1 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-ink">
                 {labels.logout}

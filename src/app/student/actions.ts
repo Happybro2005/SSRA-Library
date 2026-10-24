@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { requireStudent } from "@/lib/session";
 import { getPublicPlans, hasActiveMembership } from "@/lib/queries";
 import { todayIST } from "@/lib/dates";
@@ -46,14 +47,18 @@ export async function submitUpiPayment(formData: FormData) {
 
 export async function changePassword(formData: FormData) {
   const user = await requireStudent();
+  const session = await auth();
   const current = String(formData.get("current") ?? "");
   const next = String(formData.get("next") ?? "");
-  if (next.length < 6) redirect("/student/profile?error=shortPassword");
-  if (user.passwordHash && !(await bcrypt.compare(current, user.passwordHash))) {
-    redirect("/student/profile?error=wrongPassword");
-  }
+  const confirm = String(formData.get("confirm") ?? "");
+  const back = (query: string): never => redirect(`/student/profile?${query}#password`);
+  if (next.length < 6) back("error=shortPassword");
+  if (next !== confirm) back("error=passwordMismatch");
+  // After an OTP login the student has just proved the phone is theirs, so a forgotten password can be replaced.
+  const viaOtp = session?.user?.loginMethod === "otp";
+  if (user.passwordHash && !viaOtp && !(await bcrypt.compare(current, user.passwordHash))) back("error=wrongPassword");
   await prisma.user.update({ where: { id: user.id }, data: { passwordHash: await bcrypt.hash(next, 10) } });
-  redirect("/student/profile?ok=1");
+  back("ok=1");
 }
 
 export async function requestBook(bookId: string) {

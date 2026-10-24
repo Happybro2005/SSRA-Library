@@ -28,7 +28,8 @@ It has three parts:
 - **Fee receipts**: view, print or save as PDF.
 - **E-books** (members only) and **library books**: request a physical book to borrow, with a countdown to its return date.
 - **Complaints**: raise one and see the library's reply.
-- Log in with mobile + password, or mobile + OTP. Students can set their own password.
+- Log in with mobile + password, or mobile + OTP.
+- **Change password** button in the top bar. Forgot it? Log in with an OTP: the current password is then not needed to set a new one.
 
 ### Admin panel
 - **Students**: admissions with a shift-aware seat picker (a Full-day booking blocks Morning and Evening on that seat), renewals and deactivation.
