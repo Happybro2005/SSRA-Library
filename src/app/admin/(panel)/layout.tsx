@@ -28,6 +28,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin/complaints", label: t("admin.complaints"), icon: "📣", badge: openComplaints },
     { href: "/admin/offers", label: t("admin.offers"), icon: "🎉" },
     { href: "/admin/settings", label: t("admin.settings"), icon: "⚙️" },
+    { href: "/admin/account", label: t("admin.changePassword"), icon: "🔑" },
   ];
   return (
     <PortalShell

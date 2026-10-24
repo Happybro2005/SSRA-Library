@@ -284,7 +284,8 @@
     "issues": "Borrow & return",
     "complaints": "Complaints",
     "receipts": "Fee receipts",
-    "enquiries": "Enquiries"
+    "enquiries": "Enquiries",
+    "changePassword": "Change password"
   },
   "complaint": {
     "title": "Raise a complaint",
