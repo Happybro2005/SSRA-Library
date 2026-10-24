@@ -107,3 +107,12 @@ describe("book borrowing", async () => {
     expect(endOfDayIST(d("2026-11-06")).toISOString()).toBe("2026-11-06T18:30:00.000Z");
   });
 });
+
+describe("amount in words", async () => {
+  const { amountInWords } = await import("@/lib/receipts");
+  it("hundreds", () => expect(amountInWords(700)).toBe("Rupees Seven Hundred Only"));
+  it("teens and tens", () => expect(amountInWords(1415)).toBe("Rupees One Thousand Four Hundred Fifteen Only"));
+  it("lakh", () => expect(amountInWords(125000)).toBe("Rupees One Lakh Twenty Five Thousand Only"));
+  it("crore", () => expect(amountInWords(10000001)).toBe("Rupees One Crore One Only"));
+  it("zero", () => expect(amountInWords(0)).toBe("Rupees Zero Only"));
+});

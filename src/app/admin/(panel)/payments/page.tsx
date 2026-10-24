@@ -149,7 +149,7 @@ export default async function PaymentsPage({
                 <tr key={p.id}>
                   <td>
                     {p.receiptNo ? (
-                      <Link href={`/receipt/${p.id}`} target="_blank" className="text-navy underline">
+                      <Link href={`/receipt/${p.id}`} className="text-navy underline">
                         {p.receiptNo}
                       </Link>
                     ) : (

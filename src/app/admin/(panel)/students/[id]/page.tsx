@@ -198,7 +198,7 @@ export default async function StudentPage({
                   </td>
                   <td>
                     {p.receiptNo ? (
-                      <Link href={`/receipt/${p.id}`} className="text-navy underline" target="_blank">
+                      <Link href={`/receipt/${p.id}`} className="text-navy underline">
                         {p.receiptNo}
                       </Link>
                     ) : (

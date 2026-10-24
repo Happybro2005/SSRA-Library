@@ -55,10 +55,17 @@ body {
 }
 
 @media print {
+  @page {
+    size: A5;
+    margin: 8mm;
+  }
   .no-print {
     display: none !important;
   }
   body {
     background: white;
+    /* keep the receipt's coloured header and amount box when printing / saving as PDF */
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 }

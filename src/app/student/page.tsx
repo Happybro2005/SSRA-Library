@@ -17,7 +17,7 @@ export default async function StudentDashboard() {
   const tc = await getTranslations("complaint");
   const today = todayIST();
 
-  const [m, pending, borrowed, pendingRequests, stats, complaints, openComplaints] = await Promise.all([
+  const [m, pending, borrowed, pendingRequests, stats, complaints, openComplaints, receipts] = await Promise.all([
     getCurrentMembership(user.id, today),
     prisma.payment.findMany({ where: { userId: user.id, status: "PENDING" }, include: { plan: true } }),
     prisma.bookIssue.findMany({ where: { userId: user.id, returnedAt: null }, include: { book: true }, orderBy: { dueAt: "asc" } }),
@@ -25,6 +25,12 @@ export default async function StudentDashboard() {
     getLibraryStats(),
     prisma.complaint.findMany({ where: { userId: user.id }, orderBy: { updatedAt: "desc" }, take: 3 }),
     prisma.complaint.count({ where: { userId: user.id, status: { not: "RESOLVED" } } }),
+    prisma.payment.findMany({
+      where: { userId: user.id, status: "CONFIRMED", receiptNo: { not: null } },
+      include: { plan: true },
+      orderBy: { paidAt: "desc" },
+      take: 3,
+    }),
   ]);
 
   const status = m ? membershipStatus(m, today) : "NONE";
@@ -185,6 +191,40 @@ export default async function StudentDashboard() {
           </Link>
         </section>
       </div>
+
+      {/* Fee receipts */}
+      <section aria-labelledby="receipts" className="card">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 id="receipts" className="text-lg font-semibold">
+            🧾 {t("latestReceipts")}
+          </h2>
+          <Link href="/student/payments" className="text-sm text-navy underline">
+            {t("seeAll")}
+          </Link>
+        </div>
+        {receipts.length === 0 ? (
+          <p className="text-slate-600">{t("noReceipts")}</p>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {receipts.map((p) => (
+              <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                <div>
+                  <div className="font-mono text-sm font-bold text-navy">{p.receiptNo}</div>
+                  <div className="text-sm text-slate-500">
+                    {p.plan?.nameEn ?? p.note ?? "Fee"} · {formatDay(p.paidAt)}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold">{formatRupees(p.amount)}</span>
+                  <Link href={`/receipt/${p.id}`} className="btn-outline btn-sm">
+                    {t("viewReceipt")}
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {/* Library at a glance */}
       <section aria-labelledby="glance" className="card">

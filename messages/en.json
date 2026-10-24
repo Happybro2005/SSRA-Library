@@ -95,7 +95,7 @@
   "student": {
     "dashboard": "Dashboard",
     "pay": "Pay fees",
-    "payments": "Payments",
+    "payments": "Fee receipts",
     "ebooks": "E-books",
     "books": "My books",
     "profile": "Profile",
@@ -196,7 +196,15 @@
     "libraryGlance": "Library at a glance",
     "noPlanCta": "Visit the library desk to get a seat and plan.",
     "renewPlan": "Renew plan",
-    "dueSoon": "due soon"
+    "dueSoon": "due soon",
+    "receiptsIntro": "Open a receipt to print it or save it as a PDF.",
+    "viewReceipt": "View / download",
+    "noReceipts": "No fee receipts yet. Receipts appear here once the library confirms your payment.",
+    "totalPaid": "Total paid",
+    "receiptsCount": "{count, plural, one {# receipt} other {# receipts}}",
+    "otherPayments": "Other payments",
+    "latestReceipts": "Fee receipts",
+    "validTill": "Valid till {date}"
   },
   "admin": {
     "panel": "Admin panel",
@@ -211,7 +219,8 @@
     "settings": "Settings",
     "viewSite": "View website",
     "issues": "Borrow & return",
-    "complaints": "Complaints"
+    "complaints": "Complaints",
+    "receipts": "Fee receipts"
   },
   "complaint": {
     "title": "Raise a complaint",

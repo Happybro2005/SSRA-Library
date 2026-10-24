@@ -18,6 +18,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin/students", label: t("admin.students"), icon: "🎓" },
     { href: "/admin/seats", label: t("admin.seats"), icon: "🪑" },
     { href: "/admin/payments", label: t("admin.payments"), icon: "💰", badge: pending },
+    { href: "/admin/receipts", label: t("admin.receipts"), icon: "🧾" },
     { href: "/admin/dues", label: t("admin.dues"), icon: "⏰" },
     { href: "/admin/plans", label: t("admin.plans"), icon: "🏷️" },
     { href: "/admin/books", label: t("admin.books"), icon: "📚" },
