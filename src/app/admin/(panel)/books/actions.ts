@@ -64,13 +64,44 @@ export async function saveBook(id: string | null, formData: FormData) {
   flashRedirect(PATH + `?type=${data.type}`, "ok", `“${data.title}” saved.`);
 }
 
+/** Deletes books and their uploaded files. Books a student still has are skipped (they must be returned first). */
+async function removeBooks(ids: string[]) {
+  const books = await prisma.book.findMany({
+    where: { id: { in: ids } },
+    include: { _count: { select: { issues: { where: { returnedAt: null } } } } },
+  });
+  const blocked = books.filter((b) => b._count.issues > 0);
+  const deletable = books.filter((b) => b._count.issues === 0);
+  await prisma.book.deleteMany({ where: { id: { in: deletable.map((b) => b.id) } } });
+  for (const b of deletable) {
+    for (const key of [b.filePath, b.coverPath]) {
+      // The record is already gone; a missing file must not stop the rest.
+      if (key) await storage.remove(key).catch((err) => console.error("[books] could not remove file", key, err));
+    }
+  }
+  revalidatePath("/");
+  revalidatePath("/books");
+  return { deleted: deletable, blocked };
+}
+
 export async function deleteBook(id: string) {
   await requireAdmin();
-  const book = await prisma.book.delete({ where: { id } });
-  if (book.filePath) await storage.remove(book.filePath);
-  if (book.coverPath) await storage.remove(book.coverPath);
-  revalidatePath("/");
-  flashRedirect(PATH + `?type=${book.type}`, "ok", `“${book.title}” deleted.`);
+  const { deleted, blocked } = await removeBooks([id]);
+  const type = (deleted[0] ?? blocked[0])?.type ?? "PHYSICAL";
+  if (blocked.length) {
+    flashRedirect(PATH + `?type=${type}`, "error", `“${blocked[0].title}” is with a student. Mark it returned in Borrow & return before deleting.`);
+  }
+  flashRedirect(PATH + `?type=${type}`, "ok", deleted.length ? `“${deleted[0].title}” deleted.` : "Book was already deleted.");
+}
+
+export async function deleteSelectedBooks(type: "PHYSICAL" | "EBOOK", formData: FormData) {
+  await requireAdmin();
+  const ids = formData.getAll("ids").map(String).filter(Boolean);
+  if (ids.length === 0) flashRedirect(PATH + `?type=${type}`, "error", "Tick the books you want to delete first.");
+  const { deleted, blocked } = await removeBooks(ids);
+  const parts = [`${deleted.length} book${deleted.length === 1 ? "" : "s"} deleted.`];
+  if (blocked.length) parts.push(`Kept ${blocked.map((b) => `“${b.title}”`).join(", ")} because a student has a copy.`);
+  flashRedirect(PATH + `?type=${type}`, blocked.length && !deleted.length ? "error" : "ok", parts.join(" "));
 }
 
 const issueSchema = z.object({
