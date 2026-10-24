@@ -8,7 +8,8 @@ import { openState } from "@/lib/hours";
 export async function SiteHeader() {
   const t = await getTranslations();
   const [session, settings] = await Promise.all([auth(), getSettings()]);
-  const portal = session?.user?.role === "ADMIN" ? "/admin" : "/student";
+  // The public site never shows an admin button: staff use /admin/login (linked quietly in the footer).
+  const isStudent = session?.user?.role === "STUDENT";
   const state = openState(settings.openTime, settings.closeTime);
   const links = [
     { href: "/#about", label: t("home.navAbout") },
@@ -59,13 +60,13 @@ export async function SiteHeader() {
               ))}
             </ul>
           </details>
-          {session?.user ? (
-            <Link href={portal} className="btn-brand btn-sm ml-1">
-              {session.user.role === "ADMIN" ? t("admin.panel") : t("student.dashboard")}
+          {isStudent ? (
+            <Link href="/student" className="btn-brand btn-sm ml-1">
+              {t("home.myDashboard")}
             </Link>
           ) : (
             <Link href="/login" className="btn-brand btn-sm ml-1">
-              {t("common.login")}
+              {t("home.studentLogin")}
             </Link>
           )}
         </nav>

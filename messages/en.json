@@ -126,7 +126,8 @@
     "whatsappLine": "WhatsApp",
     "footerStaff": "Staff login",
     "footerBooks": "Books",
-    "footerStudent": "Student login"
+    "footerStudent": "Student login",
+    "myDashboard": "My dashboard"
   },
   "login": {
     "title": "Login to SSRA Library",
