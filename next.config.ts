@@ -7,7 +7,9 @@ const I18N_REQUEST = "./src/i18n/request.ts";
 
 const nextConfig: NextConfig = {
   experimental: {
-    serverActions: { bodySizeLimit: "50mb" },
+    serverActions: { bodySizeLimit: "510mb" },
+    // Requests to /admin pass through middleware (login check), which otherwise cuts bodies off at 10 MB.
+    middlewareClientMaxBodySize: "510mb",
   },
   turbopack: {
     resolveAlias: { "next-intl/config": I18N_REQUEST },

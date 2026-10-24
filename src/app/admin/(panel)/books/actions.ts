@@ -5,7 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { flashRedirect } from "@/lib/flash";
-import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL, storage } from "@/lib/storage";
+import { EBOOK_KEY, MAX_IMAGE_BYTES, MAX_PDF_BYTES, sizeLabel, storage } from "@/lib/storage";
 import { addDays, todayIST } from "@/lib/dates";
 import { formObject, mobileSchema, optionalText } from "@/lib/validation";
 import { DEFAULT_LOAN_DAYS } from "@/lib/library";
@@ -35,17 +35,30 @@ export async function saveBook(id: string | null, formData: FormData) {
 
   const pdf = fileFrom(formData, "file");
   const cover = fileFrom(formData, "cover");
-  if (pdf && (pdf.type !== "application/pdf" || pdf.size > MAX_UPLOAD_BYTES)) {
-    flashRedirect(back, "error", `E-book must be a PDF under ${MAX_UPLOAD_LABEL}.`);
+  // On Vercel the browser has already uploaded the PDF to Blob storage and sends only its key.
+  const uploadedKey = String(formData.get("uploadedKey") ?? "");
+  const uploadedName = String(formData.get("uploadedName") ?? "").slice(0, 200) || "book.pdf";
+  if (pdf && (pdf.type !== "application/pdf" || pdf.size > MAX_PDF_BYTES)) {
+    flashRedirect(back, "error", `E-book must be a PDF under ${sizeLabel(MAX_PDF_BYTES)}.`);
   }
-  if (cover && !cover.type.startsWith("image/")) flashRedirect(back, "error", "Cover must be an image.");
+  if (uploadedKey && (!EBOOK_KEY.test(uploadedKey) || !(await storage.exists(uploadedKey)))) {
+    flashRedirect(back, "error", "The PDF upload didn’t finish. Please choose the file and save again.");
+  }
+  if (cover && (!cover.type.startsWith("image/") || cover.size > MAX_IMAGE_BYTES)) {
+    flashRedirect(back, "error", `Cover must be an image under ${sizeLabel(MAX_IMAGE_BYTES)}.`);
+  }
 
   const existing = id ? await prisma.book.findUnique({ where: { id } }) : null;
-  if (data.type === "EBOOK" && !pdf && !existing?.filePath) flashRedirect(back, "error", "Upload the PDF for this e-book.");
+  const newPdf = !!pdf || !!uploadedKey;
+  if (data.type === "EBOOK" && !newPdf && !existing?.filePath) flashRedirect(back, "error", "Upload the PDF for this e-book.");
 
-  const fileFields = pdf ? { filePath: await storage.save("ebooks", pdf), fileName: pdf.name } : {};
+  const fileFields = uploadedKey
+    ? { filePath: uploadedKey, fileName: uploadedName }
+    : pdf
+      ? { filePath: await storage.save("ebooks", pdf), fileName: pdf.name }
+      : {};
   const coverFields = cover ? { coverPath: await storage.save("public/covers", cover) } : {};
-  if (pdf && existing?.filePath) await storage.remove(existing.filePath);
+  if (newPdf && existing?.filePath) await storage.remove(existing.filePath);
   if (cover && existing?.coverPath) await storage.remove(existing.coverPath);
 
   const copies = data.type === "EBOOK" ? 1 : data.totalCopies;
