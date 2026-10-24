@@ -57,3 +57,6 @@ Needs Node.js 20+ and PostgreSQL. Easiest: a small VPS (Hostinger / DigitalOcean
 ## Notes
 - Only the poster's ₹700 / 2-month Diwali–Chhath offer is seeded as a fee plan; add your regular monthly prices in Admin → Fee plans.
 - The site is English only. All text lives in `messages/en.json`.
+
+## Author
+Developed by Prashant Singh ([@Happybro2005](https://github.com/Happybro2005)).
