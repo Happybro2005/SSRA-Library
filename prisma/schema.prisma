@@ -1,0 +1,271 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STUDENT
+}
+
+enum PaymentMode {
+  CASH
+  UPI
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ComplaintStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum BookType {
+  PHYSICAL
+  EBOOK
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  mobile       String   @unique
+  passwordHash String?
+  role         Role     @default(STUDENT)
+  fatherName   String?
+  address      String?
+  gender       String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships      Membership[]
+  payments         Payment[]    @relation("PaymentUser")
+  recordedPayments Payment[]    @relation("PaymentRecorder")
+  bookIssues       BookIssue[]
+  bookRequests     BookRequest[]
+  complaints       Complaint[]
+}
+
+model Shift {
+  id        String  @id @default(cuid())
+  nameEn    String
+  nameHi    String
+  startTime String // "HH:mm"
+  endTime   String // "HH:mm"
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  memberships Membership[]
+  plans       FeePlan[]
+}
+
+model Seat {
+  id       String  @id @default(cuid())
+  number   Int     @unique
+  isActive Boolean @default(true)
+
+  memberships Membership[]
+}
+
+model FeePlan {
+  id             String    @id @default(cuid())
+  nameEn         String
+  nameHi         String
+  durationMonths Int
+  price          Int
+  shiftId        String?
+  shift          Shift?    @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+  isOffer        Boolean   @default(false)
+  validFrom      DateTime?
+  validTill      DateTime?
+  isActive       Boolean   @default(true)
+  sortOrder      Int       @default(0)
+  createdAt      DateTime  @default(now())
+
+  memberships Membership[]
+  payments    Payment[]
+  promotions  Promotion[]
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  seatId    String
+  seat      Seat     @relation(fields: [seatId], references: [id])
+  shiftId   String
+  shift     Shift    @relation(fields: [shiftId], references: [id])
+  planId    String?
+  plan      FeePlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  startDate DateTime
+  endDate   DateTime
+  amount    Int
+  createdAt DateTime @default(now())
+
+  payments Payment[]
+
+  @@index([seatId, startDate, endDate])
+  @@index([userId])
+}
+
+model Payment {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation("PaymentUser", fields: [userId], references: [id], onDelete: Cascade)
+  membershipId String?
+  membership   Membership?   @relation(fields: [membershipId], references: [id], onDelete: SetNull)
+  planId       String?
+  plan         FeePlan?      @relation(fields: [planId], references: [id], onDelete: SetNull)
+  amount       Int
+  mode         PaymentMode
+  upiRef       String?
+  status       PaymentStatus @default(CONFIRMED)
+  receiptNo    String?       @unique
+  note         String?
+  paidAt       DateTime      @default(now())
+  createdAt    DateTime      @default(now())
+  recordedById String?
+  recordedBy   User?         @relation("PaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([userId])
+}
+
+model Counter {
+  key   String @id
+  value Int    @default(0)
+}
+
+model Book {
+  id              String   @id @default(cuid())
+  title           String
+  author          String?
+  category        String?
+  language        String?
+  type            BookType
+  totalCopies     Int      @default(1)
+  availableCopies Int      @default(1)
+  filePath        String?
+  fileName        String?
+  coverPath       String?
+  createdAt       DateTime @default(now())
+
+  issues   BookIssue[]
+  requests BookRequest[]
+
+  @@index([type])
+}
+
+model BookIssue {
+  id         String    @id @default(cuid())
+  bookId     String
+  book       Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  issuedAt   DateTime  @default(now())
+  dueAt      DateTime
+  returnedAt DateTime?
+}
+
+/// A student asking to borrow a physical book; the admin approves it (which issues the book) or rejects it.
+model BookRequest {
+  id         String        @id @default(cuid())
+  bookId     String
+  book       Book          @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status     RequestStatus @default(PENDING)
+  note       String?
+  createdAt  DateTime      @default(now())
+  decidedAt  DateTime?
+
+  @@index([status])
+  @@index([userId, status])
+}
+
+/// A problem a student reports (seat, AC, cleanliness, fees…); the admin replies and resolves it.
+model Complaint {
+  id         String          @id @default(cuid())
+  userId     String
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category   String
+  message    String
+  status     ComplaintStatus @default(OPEN)
+  reply      String?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  resolvedAt DateTime?
+
+  @@index([status])
+  @@index([userId])
+}
+
+model Facility {
+  id        String @id @default(cuid())
+  titleEn   String
+  titleHi   String
+  icon      String @default("✓")
+  sortOrder Int    @default(0)
+}
+
+model GalleryImage {
+  id        String   @id @default(cuid())
+  path      String
+  caption   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  key   String @id
+  value String
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  mobile    String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([mobile, createdAt])
+}
+
+model Promotion {
+  id         String    @id @default(cuid())
+  titleEn    String
+  titleHi    String
+  messageEn  String
+  messageHi  String
+  badge      String?
+  imagePath  String?
+  ctaTextEn  String?
+  ctaTextHi  String?
+  ctaLink    String?
+  startDate  DateTime
+  endDate    DateTime
+  isActive   Boolean   @default(true)
+  priority   Int       @default(0)
+  planId     String?
+  plan       FeePlan?  @relation(fields: [planId], references: [id], onDelete: SetNull)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
