@@ -22,7 +22,8 @@ const EDITABLE: SettingKey[] = [
   "upiId",
   "upiPayeeName",
   "mapEmbedUrl",
-  "openingHours",
+  "openTime",
+  "closeTime",
   "announcementEn",
 ];
 
@@ -36,6 +37,7 @@ export async function saveSettings(formData: FormData) {
   await requireAdmin();
   const raw = formObject(formData);
   if (raw.upiId && !/^[\w.\-]+@[\w.\-]+$/.test(raw.upiId.trim())) flashRedirect(PATH, "error", "UPI ID looks wrong (example: name@okaxis).");
+  if (raw.openTime && raw.closeTime && !(raw.openTime < raw.closeTime)) flashRedirect(PATH, "error", "Closing time must be after opening time.");
   if (raw.mapEmbedUrl && !raw.mapEmbedUrl.startsWith("https://")) flashRedirect(PATH, "error", "Map link must start with https://");
   for (const key of EDITABLE) {
     if (!(key in raw)) continue;

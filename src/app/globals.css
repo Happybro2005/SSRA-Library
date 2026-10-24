@@ -8,7 +8,17 @@
   --color-sun: #ffd60a;
   --color-ink: #1a1a2e;
   --color-paper: #f7f7fb;
+  --color-lamp: #ffc83d;
+  --color-chalk: #f3f5fa;
+  --color-leaf: #1f9d6b;
+  --color-slate-ink: #5b6478;
+}
+
+/* inline: font variables come from next/font classes on <body> or a page wrapper, so resolve them where used */
+@theme inline {
   --font-display: var(--font-oswald), "Oswald", sans-serif;
+  --font-poster: var(--nf-poster, "Oswald"), "Big Shoulders Display", "Oswald", sans-serif;
+  --font-mono: var(--nf-mono, ui-monospace), "IBM Plex Mono", ui-monospace, monospace;
   --font-sans: var(--font-hind), "Hind", system-ui, sans-serif;
 }
 
@@ -68,4 +78,28 @@ body {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
+}
+
+/* Public site: seat-board tiles light up one after another on load. */
+@keyframes desk-on {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.desk-on {
+  animation: desk-on 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .desk-on {
+    animation: none;
+  }
+}
+:focus-visible {
+  outline: 3px solid var(--color-lamp);
+  outline-offset: 2px;
 }

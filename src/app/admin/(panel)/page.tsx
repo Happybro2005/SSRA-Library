@@ -9,7 +9,7 @@ export default async function AdminDashboard() {
   const today = todayIST();
   const monthStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1) - 330 * 60 * 1000);
 
-  const [activeStudents, seats, collection, dues, pending, overdueBooks, ebooks, physical, bookRequests, booksOut, openComplaints] = await Promise.all([
+  const [activeStudents, seats, collection, dues, pending, overdueBooks, ebooks, physical, bookRequests, booksOut, openComplaints, newEnquiries] = await Promise.all([
     prisma.user.count({ where: { role: "STUDENT", isActive: true, memberships: { some: coveringWhere(today) } } }),
     getSeatAvailability(today),
     prisma.payment.aggregate({ where: { status: "CONFIRMED", paidAt: { gte: monthStart } }, _sum: { amount: true } }),
@@ -21,6 +21,7 @@ export default async function AdminDashboard() {
     prisma.bookRequest.count({ where: { status: "PENDING" } }),
     prisma.bookIssue.count({ where: { returnedAt: null } }),
     prisma.complaint.count({ where: { status: { not: "RESOLVED" } } }),
+    prisma.enquiry.count({ where: { handled: false } }),
   ]);
 
   return (
@@ -37,6 +38,7 @@ export default async function AdminDashboard() {
         <StatCard label="Expiring in 7 days" value={dues.expiring.length} tone="amber" href="/admin/dues" />
         <StatCard label="Expired, not renewed" value={dues.expired.length} tone="brand" href="/admin/dues" />
         <StatCard label="UPI payments to confirm" value={pending} tone={pending ? "amber" : "navy"} href="/admin/payments" />
+        <StatCard label="New website enquiries" value={newEnquiries} tone={newEnquiries ? "amber" : "navy"} href="/admin/enquiries" />
         <StatCard label="Open complaints" value={openComplaints} tone={openComplaints ? "brand" : "navy"} href="/admin/complaints" />
         <StatCard label="Book borrow requests" value={bookRequests} tone={bookRequests ? "amber" : "navy"} href="/admin/books/issues" />
         <StatCard label="Books borrowed now" value={booksOut} href="/admin/books/issues" />

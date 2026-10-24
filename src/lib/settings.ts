@@ -12,7 +12,8 @@ export const DEFAULT_SETTINGS = {
   upiPayeeName: "SSRA Library",
   upiQrPath: "",
   mapEmbedUrl: "",
-  openingHours: "6:00 AM – 10:00 PM",
+  openTime: "06:00",
+  closeTime: "21:00",
   announcementEn: "",
 };
 

@@ -42,7 +42,10 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
             <Field label="Mobile" name="mobile" defaultValue={s.mobile} />
             <Field label="Emergency number" name="emergencyMobile" defaultValue={s.emergencyMobile} />
             <Field label="WhatsApp number" name="whatsapp" defaultValue={s.whatsapp} />
-            <Field label="Opening hours" name="openingHours" defaultValue={s.openingHours} />
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="Opens at" name="openTime" type="time" defaultValue={s.openTime} />
+              <Field label="Closes at" name="closeTime" type="time" defaultValue={s.closeTime} />
+            </div>
             <div className="sm:col-span-2">
               <Field
                 label="Google Maps embed link (optional — Share → Embed a map → copy the src URL)"

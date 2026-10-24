@@ -29,8 +29,8 @@ async function main() {
     await prisma.shift.createMany({
       data: [
         { nameEn: "Morning", nameHi: "सुबह", startTime: "06:00", endTime: "14:00", sortOrder: 1 },
-        { nameEn: "Evening", nameHi: "शाम", startTime: "14:00", endTime: "22:00", sortOrder: 2 },
-        { nameEn: "Full day", nameHi: "पूरा दिन", startTime: "06:00", endTime: "22:00", sortOrder: 3 },
+        { nameEn: "Evening", nameHi: "शाम", startTime: "14:00", endTime: "21:00", sortOrder: 2 },
+        { nameEn: "Full day", nameHi: "पूरा दिन", startTime: "06:00", endTime: "21:00", sortOrder: 3 },
       ],
     });
   }
@@ -54,7 +54,9 @@ async function main() {
         sortOrder: 0,
       },
     });
-    // Regular monthly prices aren't on the poster — add them from Admin → Fee plans.
+    await prisma.feePlan.create({
+      data: { nameEn: "Monthly", nameHi: "Monthly", durationMonths: 1, price: 500, sortOrder: 1 },
+    });
 
     await prisma.promotion.create({
       data: {

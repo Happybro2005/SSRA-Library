@@ -218,6 +218,19 @@ model Complaint {
   @@index([userId])
 }
 
+/// A message sent from the public "Contact us" form (admission questions etc.).
+model Enquiry {
+  id        String   @id @default(cuid())
+  name      String
+  mobile    String
+  shift     String?
+  message   String
+  handled   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([handled, createdAt])
+}
+
 model Facility {
   id        String @id @default(cuid())
   titleEn   String

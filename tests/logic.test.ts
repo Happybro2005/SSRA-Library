@@ -116,3 +116,19 @@ describe("amount in words", async () => {
   it("crore", () => expect(amountInWords(10000001)).toBe("Rupees One Crore One Only"));
   it("zero", () => expect(amountInWords(0)).toBe("Rupees Zero Only"));
 });
+
+describe("library hours", async () => {
+  const { formatTime12, hoursLabel, openState } = await import("@/lib/hours");
+  it("12-hour times", () => {
+    expect(formatTime12("06:00")).toBe("6:00 AM");
+    expect(formatTime12("21:00")).toBe("9:00 PM");
+    expect(formatTime12("12:30")).toBe("12:30 PM");
+    expect(formatTime12("00:15")).toBe("12:15 AM");
+  });
+  it("label", () => expect(hoursLabel("06:00", "21:00")).toBe("6:00 AM – 9:00 PM"));
+  // 08:00 IST = 02:30 UTC; 21:30 IST = 16:00 UTC; 05:00 IST = 23:30 UTC the day before
+  it("open in the morning", () => expect(openState("06:00", "21:00", new Date("2026-10-24T02:30:00Z")).open).toBe(true));
+  it("closed after 9 PM", () => expect(openState("06:00", "21:00", new Date("2026-10-24T16:00:00Z"))).toEqual({ open: false, label: "Closed · opens 6:00 AM tomorrow" }));
+  it("closed before opening", () => expect(openState("06:00", "21:00", new Date("2026-10-23T23:30:00Z")).label).toBe("Closed · opens 6:00 AM"));
+  it("closes exactly at 9 PM", () => expect(openState("06:00", "21:00", new Date("2026-10-24T15:30:00Z")).open).toBe(false));
+});

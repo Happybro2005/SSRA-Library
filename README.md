@@ -2,7 +2,8 @@
 
 Website + admin panel + student portal for **SSRA Library**, Bhrigun Chauraha (Barwa-Kasia Road), Kushinagar.
 
-- **Home page** – offer popup, e-book / physical-book / seat counts, free seats per shift, fee structure, facilities, gallery, contact & map.
+- **Home page** – live seat board (free desks per shift), open/closed status and shift timeline (hours set in Admin → Settings), fee plans, facilities, books on the shelves, About us, gallery, Contact us with an enquiry form (Admin → Enquiries), offer popup.
+- **Public book catalog** (`/books`) – anyone can browse titles and copies on the shelf; reading and borrowing need a student login.
 - **Admin panel** (`/admin`) – admissions with a live seat map, renewals, fee plans & festival offers, payments with printable receipts, UPI payment confirmation, dues list with one-click WhatsApp reminders, book catalog (PDF e-books + physical books), issue/return, offer popups, site settings.
 - **Student portal** (`/student`) – plan validity countdown, quick actions, borrowed books with return countdowns, complaints, pay by UPI QR, payment history & receipts, read/download e-books (active members only), issued books, set password.
 - **Login** – mobile + password, or mobile + OTP.
@@ -52,7 +53,7 @@ With `SMS_PROVIDER="console"` the OTP is printed in the terminal running `npm ru
 | `npm run lint` | Lint |
 
 ## Hosting
-Needs Node.js 20+ and PostgreSQL. Easiest: a small VPS (Hostinger / DigitalOcean) running Postgres, `npm run build`, `npm start` behind nginx with HTTPS, and `pm2` to keep it running. Uploaded files live in `STORAGE_DIR` (default `./storage`) — back it up together with the database. Serverless hosts without a disk (e.g. Vercel) would need an S3/R2 storage adapter in `src/lib/storage`, which isn't built yet.
+Needs Node.js 20+ and PostgreSQL. Easiest: a small VPS (Hostinger / DigitalOcean) running Postgres, `npm run build`, `npm start` behind nginx with HTTPS, and `pm2` to keep it running. Uploaded files live in `STORAGE_DIR` (default `./storage`) — back it up together with the database. On Vercel, uploads go to Vercel Blob automatically when `BLOB_READ_WRITE_TOKEN` is set (max 4 MB per file).
 
 ## Notes
 - Only the poster's ₹700 / 2-month Diwali–Chhath offer is seeded as a fee plan; add your regular monthly prices in Admin → Fee plans.
