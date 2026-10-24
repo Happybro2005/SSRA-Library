@@ -19,8 +19,7 @@ class LocalStorage implements Storage {
   }
 
   async save(folder: string, file: File) {
-    const ext = path.extname(file.name).toLowerCase().replace(/[^.a-z0-9]/g, "");
-    const key = `${folder}/${randomUUID()}${ext}`;
+    const key = newKey(folder, file);
     const full = this.resolve(key);
     await fs.mkdir(path.dirname(full), { recursive: true });
     await fs.writeFile(full, Buffer.from(await file.arrayBuffer()));
@@ -36,7 +35,45 @@ class LocalStorage implements Storage {
   }
 }
 
-export const storage: Storage = new LocalStorage(path.resolve(process.env.STORAGE_DIR ?? "./storage"));
+function newKey(folder: string, file: File) {
+  const ext = path.extname(file.name).toLowerCase().replace(/[^.a-z0-9]/g, "");
+  return `${folder}/${randomUUID()}${ext}`;
+}
+
+/**
+ * Vercel Blob, used when BLOB_READ_WRITE_TOKEN is set (Vercel has no persistent disk).
+ * Keys are blob pathnames; files are always served through this app's routes, never by blob URL.
+ */
+class BlobStorage implements Storage {
+  private access = (process.env.BLOB_ACCESS === "public" ? "public" : "private") as "public" | "private";
+
+  async save(folder: string, file: File) {
+    const { put } = await import("@vercel/blob");
+    const key = newKey(folder, file);
+    await put(key, file, { access: this.access, contentType: file.type || mimeFor(key), addRandomSuffix: false });
+    return key;
+  }
+
+  async read(key: string) {
+    const { get } = await import("@vercel/blob");
+    const result = await get(key, { access: this.access });
+    if (!result || result.statusCode !== 200) throw new Error(`Blob not found: ${key}`);
+    return Buffer.from(await new Response(result.stream).arrayBuffer());
+  }
+
+  async remove(key: string) {
+    const { del } = await import("@vercel/blob");
+    await del(key);
+  }
+}
+
+const useBlob = !!process.env.BLOB_READ_WRITE_TOKEN;
+
+export const storage: Storage = useBlob ? new BlobStorage() : new LocalStorage(path.resolve(process.env.STORAGE_DIR ?? "./storage"));
+
+/** Vercel functions accept request bodies up to 4.5 MB, so uploads there are capped lower than on a server. */
+export const MAX_UPLOAD_BYTES = useBlob ? 4 * 1024 * 1024 : 50 * 1024 * 1024;
+export const MAX_UPLOAD_LABEL = `${MAX_UPLOAD_BYTES / 1024 / 1024} MB`;
 
 export const MIME_TYPES: Record<string, string> = {
   ".pdf": "application/pdf",

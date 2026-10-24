@@ -1,5 +1,6 @@
 import type { Book } from "@prisma/client";
 import { SubmitButton } from "@/components/SubmitButton";
+import { MAX_UPLOAD_LABEL } from "@/lib/storage";
 import { saveBook } from "./actions";
 
 export function BookForm({ book, defaultType = "PHYSICAL" }: { book?: Book; defaultType?: "PHYSICAL" | "EBOOK" }) {
@@ -38,7 +39,7 @@ export function BookForm({ book, defaultType = "PHYSICAL" }: { book?: Book; defa
           <input type="number" name="totalCopies" min={0} defaultValue={book?.totalCopies ?? 1} className="input" />
         </label>
         <label className="block">
-          <span className="label">PDF file (e-books, max 50 MB){book?.fileName && ` — current: ${book.fileName}`}</span>
+          <span className="label">PDF file (e-books, max {MAX_UPLOAD_LABEL}){book?.fileName && ` — current: ${book.fileName}`}</span>
           <input type="file" name="file" accept="application/pdf" className="input" />
         </label>
         <label className="block">

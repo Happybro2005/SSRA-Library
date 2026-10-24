@@ -5,13 +5,12 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { flashRedirect } from "@/lib/flash";
-import { storage } from "@/lib/storage";
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL, storage } from "@/lib/storage";
 import { addDays, todayIST } from "@/lib/dates";
 import { formObject, mobileSchema, optionalText } from "@/lib/validation";
 import { DEFAULT_LOAN_DAYS } from "@/lib/library";
 
 const PATH = "/admin/books";
-const MAX_PDF_BYTES = 50 * 1024 * 1024;
 
 const bookSchema = z.object({
   title: z.string().trim().min(1, "Title is required"),
@@ -36,8 +35,8 @@ export async function saveBook(id: string | null, formData: FormData) {
 
   const pdf = fileFrom(formData, "file");
   const cover = fileFrom(formData, "cover");
-  if (pdf && (pdf.type !== "application/pdf" || pdf.size > MAX_PDF_BYTES)) {
-    flashRedirect(back, "error", "E-book must be a PDF under 50 MB.");
+  if (pdf && (pdf.type !== "application/pdf" || pdf.size > MAX_UPLOAD_BYTES)) {
+    flashRedirect(back, "error", `E-book must be a PDF under ${MAX_UPLOAD_LABEL}.`);
   }
   if (cover && !cover.type.startsWith("image/")) flashRedirect(back, "error", "Cover must be an image.");
 
